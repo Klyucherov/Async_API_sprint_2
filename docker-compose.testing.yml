@@ -1,0 +1,98 @@
+version: '3.8'
+services:
+
+  db:
+    image: postgres:14
+    container_name: db_container
+    env_file:
+      - ./.env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${POSTGRES_DB}", "-U", "${POSTGRES_USER}" ]
+      interval: 2s
+      timeout: 2s
+      retries: 5
+    restart: on-failure
+    volumes:
+      - ./etl/etl/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7.0.7
+    container_name: redis_container
+    restart: always
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "6379:6379"
+
+  elastic:
+    image: elasticsearch:8.5.3
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+      - xpack.security.enabled=false
+      - USE_SSL=false
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -s -I http://localhost:9200 | grep -q 'HTTP/1.1 200 OK'",
+        ]
+      interval: 1s
+      timeout: 5s
+      retries: 120
+    container_name: elastic_compose
+    ports:
+      - "9200:9200"
+
+  etl:
+    build:
+      context: ./etl/etl
+    env_file:
+      - ./.env
+    depends_on:
+      redis:
+        condition: service_healthy
+      elastic:
+        condition: service_healthy
+    container_name: etl_container
+    restart: unless-stopped
+    entrypoint: sh -c "python etl.py"
+
+  fastapi:
+    build:
+      context: ./fastapi
+    image: fastapi-image
+    env_file:
+      - ./.env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      elastic:
+        condition: service_healthy
+    container_name: fastapi_container
+    restart: unless-stopped
+    entrypoint: sh -c "uvicorn main:app --host 0.0.0.0 --port 8001"
+    ports:
+      - "8001:8001"
+
+  tests:
+    image: fastapi-image
+    depends_on:
+      - fastapi
+    env_file:
+      - ./.env
+    volumes:
+      - ./tests:/tests
+      - ./tests/functional/.env.docker:/tests/functional/.env
+    entrypoint: >
+      sh -c "pip install -r /tests/functional/requirements.txt
+      && python3 /tests/functional/utils/wait_for_es.py
+      && python3 /tests/functional/utils/wait_for_redis.py
+      && python3 -m pytest /tests/functional/src"
