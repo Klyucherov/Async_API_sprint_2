@@ -4,6 +4,8 @@ import os
 import backoff
 from elasticsearch import Elasticsearch, ElasticsearchException
 
+from tests.functional.settings import *
+
 
 def elastic_conn_backoff_hdlr(details):
     logging.warning(
@@ -20,9 +22,9 @@ def elastic_conn_backoff_hdlr(details):
 )
 def check_elastic_connection():
 
-    es_host = os.getenv('ELASTIC_HOST', default='localhost')
-    es_port = os.getenv('ELASTIC_PORT', default=6379)
-    es_total_count = int(os.getenv('TOTAL_ITEMS_COUNT', 5191))
+    es_host = os.getenv('ELASTIC_HOST', default=ELASTIC_HOST)
+    es_port = os.getenv('ELASTIC_PORT', default=ELASTIC_PORT)
+    es_total_count = int(os.getenv('TOTAL_ITEMS_COUNT', TOTAL_ITEMS_COUNT))
 
     es_client = Elasticsearch(
         hosts=[f'{es_host}:{es_port}'])

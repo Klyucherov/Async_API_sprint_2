@@ -1,26 +1,27 @@
-import pytest
-from redis.asyncio import Redis
-from orjson import orjson
 from http import HTTPStatus
 
-from tests.functional.utils.helpers import get_data
+import pytest
+from orjson import orjson
+from redis.asyncio import Redis
+
 from tests.functional.settings import movies_settings
 from tests.functional.testdata.film_data import (COMEDY_FILMS,
                                                  DOCUMENTARY_FILMS,
                                                  LAST_PAGE_FILMS, SORTED_FILMS,
                                                  STAR_WARS_FILM)
+from tests.functional.utils.helpers import get_data
 
 
 @pytest.mark.parametrize(
     'query, expected_answer',
     [
         (
-            '',
-            {'status': HTTPStatus.OK, 'length': 25}
+                '',
+                {'status': HTTPStatus.OK, 'length': 25}
         ),
         (
-            '/97f168bd-d10d-481b-ad38-89d252a13feb',
-            {'status': HTTPStatus.OK, 'length': 9}
+                '/' + STAR_WARS_FILM['id'],
+                {'status': HTTPStatus.OK, 'length': 9}
         ),
     ]
 )
@@ -42,8 +43,8 @@ async def test_get_request_status(api_session, query, expected_answer):
     'query, expected_answer',
     [
         (
-            "/None",
-            {"detail": "film not found"}
+                "/None",
+                {"detail": "film not found"}
         ),
     ]
 )
@@ -64,12 +65,12 @@ async def test_get_film_by_id(api_session, query, expected_answer):
     'query_params, expected_answer',
     [
         (
-            {
-                "page_number": 2,
-                "page_size": 10,
-                "sort_by_rating": "desc"
-            }
-            , SORTED_FILMS
+                {
+                    "page_number": 2,
+                    "page_size": 10,
+                    "sort_by_rating": "desc"
+                }
+                , SORTED_FILMS
         )
     ]
 )
@@ -91,22 +92,22 @@ async def test_get_sorted_films(api_session, query_params, expected_answer):
     'query_params, expected_answer',
     [
         (
-            {
-                "page_number": 1,
-                "page_size": 2,
-                "sort_by_rating": "desc",
-                "filter[genre]": "6d141ad2-d407-4252-bda4-95590aaf062a"
-            }
-            , DOCUMENTARY_FILMS
+                {
+                    "page_number": 1,
+                    "page_size": 2,
+                    "sort_by_rating": "desc",
+                    "filter[genre]": "6d141ad2-d407-4252-bda4-95590aaf062a"
+                }
+                , DOCUMENTARY_FILMS
         ),
         (
-            {
-                "page_number": 1,
-                "page_size": 2,
-                "sort_by_rating": "desc",
-                "filter[genre]": "5373d043-3f41-4ea8-9947-4b746c601bbd"
-            }
-            , COMEDY_FILMS
+                {
+                    "page_number": 1,
+                    "page_size": 2,
+                    "sort_by_rating": "desc",
+                    "filter[genre]": "5373d043-3f41-4ea8-9947-4b746c601bbd"
+                }
+                , COMEDY_FILMS
         )
     ]
 )
@@ -128,20 +129,20 @@ async def test_get_film_by_genre(api_session, query_params, expected_answer):
     'query_params, expected_answer',
     [
         (
-            {
-                "page_number": 41,
-                "page_size": 25,
-                "sort_by_rating": "desc"
-            }
-            , LAST_PAGE_FILMS
+                {
+                    "page_number": 41,
+                    "page_size": 25,
+                    "sort_by_rating": "desc"
+                }
+                , LAST_PAGE_FILMS
         ),
         (
-            {
-                "page_number": 1000,
-                "page_size": 25,
-                "sort_by_rating": "desc"
-            }
-            , LAST_PAGE_FILMS
+                {
+                    "page_number": 1000,
+                    "page_size": 25,
+                    "sort_by_rating": "desc"
+                }
+                , LAST_PAGE_FILMS
         )
     ]
 )
@@ -163,8 +164,8 @@ async def test_get_film_by_genre(api_session, query_params, expected_answer):
     'query, expected_answer',
     [
         (
-            '/97f168bd-d10d-481b-ad38-89d252a13feb',
-            STAR_WARS_FILM
+                '/' + STAR_WARS_FILM['id'],
+                STAR_WARS_FILM
         ),
     ]
 )

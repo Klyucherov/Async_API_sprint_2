@@ -2,9 +2,9 @@ import logging
 from abc import ABC, abstractmethod
 from typing import List
 
-from redis.asyncio import Redis
 from db.db_data_getter import ElasticDataGetter
 from db.storage import RedisStorage
+from redis.asyncio import Redis
 from utils.cache import cache
 
 

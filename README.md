@@ -85,3 +85,11 @@ ___
 и после выполнения тестов завершит их работу.
 
 Для более детального ознакомления с командой см. Makefile в корне репозитория.
+
+https://github.com/Klyucherov/Async_API_sprint_2
+
+## Для ревьюера!
+
+В классе FilmService вы написали использовать абстрактный класс и адаптера, я и так их использовал.<br>
+Класс FilmService наследуется от BaseDataService который в ините принимает RedisStorage и ElasticDataGetter это и есть адаптеры<br>
+Если посмотреть их то они как раз таки наследуются от абстрактных класов BaseStorage и DBDataGetter. В файле [storage.py](fastapi%2Fsrc%2Fdb%2Fstorage.py) и [db_data_getter.py](fastapi%2Fsrc%2Fdb%2Fdb_data_getter.py)

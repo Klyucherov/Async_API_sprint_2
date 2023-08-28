@@ -6,6 +6,11 @@ from pydantic import BaseSettings, Field
 from tests.functional.testdata.es_mapping import (genre_index, movies_index,
                                                   person_index)
 
+REDIS_HOST = 'localhost'
+ELASTIC_HOST = 'localhost'
+ELASTIC_PORT = 6379
+TOTAL_ITEMS_COUNT = 5191
+
 
 class BaseConfig(BaseSettings):
     es_host: str = Field('http://127.0.0.1', env='ELASTIC_HOST')

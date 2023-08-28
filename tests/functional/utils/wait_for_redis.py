@@ -4,12 +4,14 @@ import os
 import backoff
 from redis import Redis, exceptions
 
+from tests.configs import *
+
 
 def redis_conn_backoff_hdlr(details):
     logging.info(
-     "\t\n ==> Redis connection Error. "
-     "Backing off {wait:0.1f} seconds after {tries} tries "
-     "Details: {args}".format(**details))
+        "\t\n ==> Redis connection Error. "
+        "Backing off {wait:0.1f} seconds after {tries} tries "
+        "Details: {args}".format(**details))
 
 
 @backoff.on_exception(
@@ -19,7 +21,7 @@ def redis_conn_backoff_hdlr(details):
     max_tries=10
 )
 def check_redis_connection():
-    redis_host = os.getenv('REDIS_HOST', default='localhost')
+    redis_host = os.getenv('REDIS_HOST', default=REDIS_HOST)
     redis = Redis(host=redis_host)
     redis.ping()
 
