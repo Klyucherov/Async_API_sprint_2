@@ -2,12 +2,12 @@ from dataclasses import asdict
 from functools import lru_cache
 from typing import List, Optional
 
-from redis.asyncio import Redis
 from api.v1.models.api_query_params_model import (FilmListSearch,
                                                   SearchQueryParams)
+from db.db_data_getter import DBDataGetter
 from db.elastic import get_elastic
 from db.redis import get_redis
-from elasticsearch import AsyncElasticsearch
+from db.storage import BaseStorage
 from services.base_service import BaseDataService
 
 from fastapi import Depends
@@ -19,8 +19,8 @@ class FilmService(BaseDataService):
     нечеткий (полнотекстовый) поиск.
     """
 
-    def __init__(self, redis: Redis, elastic: AsyncElasticsearch):
-        super().__init__(elastic, redis)
+    def __init__(self, cache_storage: BaseStorage, search_engine: DBDataGetter):
+        super().__init__(search_engine, cache_storage)
         self.index_name = 'movies'
 
     async def get_list_films(self, query: FilmListSearch) -> Optional[List[dict]]:
@@ -90,6 +90,6 @@ class FilmService(BaseDataService):
 
 
 @lru_cache()
-def get_film_service(redis: Redis = Depends(get_redis),
-                     elastic: AsyncElasticsearch = Depends(get_elastic), ) -> FilmService:
-    return FilmService(redis, elastic)
+def get_film_service(cache_storage: BaseStorage = Depends(get_redis),
+                     search_engine: DBDataGetter = Depends(get_elastic), ) -> FilmService:
+    return FilmService(cache_storage, search_engine)
